@@ -1,7 +1,7 @@
 import { Link, router, Head } from '@inertiajs/react';
 import { ReactNode, useState, useEffect } from 'react';
 import { UserAvatar } from '@/components/UserAvatar';
-import ApplicationLogo from '@/Components/ApplicationLogo';
+import ApplicationLogo from '@/components/ApplicationLogo';
 import { Sidebar } from '@/components/Sidebar';
 
 interface User {
