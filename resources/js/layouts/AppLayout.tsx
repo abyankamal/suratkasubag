@@ -3,6 +3,7 @@ import { ReactNode, useState, useEffect } from 'react';
 import { UserAvatar } from '@/components/UserAvatar';
 import ApplicationLogo from '@/components/ApplicationLogo';
 import { Sidebar } from '@/components/Sidebar';
+import { redirectIfUnauthenticated } from '@/middleware/AuthMiddleware';
 
 interface User {
     id: number;
@@ -48,9 +49,7 @@ export default function AppLayout({ auth, header, children }: AppLayoutProps) {
     
     // Protect dashboard routes - redirect to login if not authenticated
     useEffect(() => {
-        if (!auth.user) {
-            window.location.href = '/login';
-        }
+        redirectIfUnauthenticated({ auth });
     }, [auth.user]);
 
     // Don't render anything if not authenticated (will be redirected)

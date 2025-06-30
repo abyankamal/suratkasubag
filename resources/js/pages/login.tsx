@@ -1,19 +1,27 @@
 import { useState, useEffect } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import { useForm } from '@inertiajs/react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Eye, EyeOff } from 'lucide-react';
 import LoginLayout from '@/layouts/login-layout';
+import { redirectIfAuthenticated } from '@/middleware/AuthMiddleware';
+import { type SharedData } from '@/types';
 
 export default function Login() {
+  const { auth } = usePage<SharedData>().props;
   const [showPassword, setShowPassword] = useState(false);
   
   const { data, setData, post, processing, errors } = useForm({
     username: '',
     password: '',
   });
+  
+  // Redirect to dashboard if already authenticated
+  useEffect(() => {
+    redirectIfAuthenticated({ auth });
+  }, [auth]);
 
   const [greeting, setGreeting] = useState('');
 
