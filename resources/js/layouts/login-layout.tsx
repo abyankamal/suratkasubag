@@ -13,7 +13,7 @@ export default function LoginLayout({ children }: LoginLayoutProps) {
       <LoginHeader />
       
       <div className="flex-1 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md shadow-md">
+        <Card className="w-full max-w-md shadow-md bg-white">
           <CardContent className="p-6">
             {children}
           </CardContent>
