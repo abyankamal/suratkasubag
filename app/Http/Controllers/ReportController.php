@@ -27,12 +27,12 @@ class ReportController extends Controller
     /**
      * Show the form for editing the specified report.
      *
-     * @param  int  $id
+     * @param  int  $report
      * @return \Inertia\Response
      */
-    public function edit($id)
+    public function edit($report)
     {
-        $report = Report::findOrFail($id);
+        $report = Report::findOrFail($report);
         
         // Check if user has permission to edit this report
         if (Auth::user()->role !== 'admin' && Auth::id() !== $report->user_id) {
@@ -114,6 +114,35 @@ class ReportController extends Controller
     }
 
     /**
+     * Display the specified report.
+     *
+     * @param  int  $report
+     * @return \Inertia\Response
+     */
+    public function show($report)
+    {
+        $report = Report::findOrFail($report);
+
+        // Check if user has permission to view this report
+        if (Auth::user()->role !== 'admin' && Auth::id() !== $report->user_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        return Inertia::render('Reports/Show', [
+            'report' => [
+                'id' => $report->id,
+                'title' => $report->filename,
+                'filename' => $report->filename,
+                'stored_name' => $report->stored_name,
+                'path' => $report->path,
+                'created_at' => $report->created_at,
+                'updated_at' => $report->updated_at,
+                'user_id' => $report->user_id,
+            ]
+        ]);
+    }
+
+    /**
      * Store a newly created report in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -162,17 +191,13 @@ class ReportController extends Controller
      * Update the specified report in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  int  $report
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $report)
     {
-        // Handle id parameter from route
-        // The id can come from the route parameter or from the form data
-        $id = $id ?? $request->input('id');
-        
         // Support for PUT method emulation via _method field
-        $report = Report::findOrFail($id);
+        $report = Report::findOrFail($report);
         
         // Check if user has permission to update this report
         if (Auth::user()->role !== 'admin' && Auth::id() !== $report->user_id) {
@@ -228,12 +253,12 @@ class ReportController extends Controller
     /**
      * Remove the specified report from storage.
      *
-     * @param  int  $id
+     * @param  int  $report
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy($id)
+    public function destroy($report)
     {
-        $report = Report::findOrFail($id);
+        $report = Report::findOrFail($report);
         
         // Check if user has permission to delete this report
         if (Auth::user()->role !== 'admin' && Auth::id() !== $report->user_id) {
@@ -254,12 +279,12 @@ class ReportController extends Controller
     /**
      * Download the specified report file.
      *
-     * @param  int  $id
+     * @param  int  $report
      * @return \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\RedirectResponse
      */
-    public function download($id)
+    public function download($report)
     {
-        $report = Report::findOrFail($id);
+        $report = Report::findOrFail($report);
         
         $filePath = storage_path('app/public/' . $report->path);
         

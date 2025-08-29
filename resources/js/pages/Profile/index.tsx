@@ -132,48 +132,6 @@ export default function ProfilePage() {
           </div>
         )}
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Left column - User photo */}
-          <div className="md:col-span-1">
-            <div className="bg-white rounded-lg shadow p-6 text-center">
-              <div className="relative mx-auto w-32 h-32 mb-4">
-                <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200 relative">
-                  <img
-                    src={previewImage || user.avatar}
-                    alt={user.name}
-                    className="object-cover w-full h-full"
-                  />
-                </div>
-                {/* Camera button and file input are currently disabled
-                <button
-                  onClick={handlePhotoClick}
-                  className="absolute bottom-0 right-0 bg-blue-500 hover:bg-blue-600 text-white rounded-full p-2 shadow"
-                  aria-label="Edit photo"
-                >
-                  <Camera size={16} />
-                </button>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  className="hidden"
-                  accept="image/*"
-                />
-                */}
-              </div>
-              <h2 className="text-xl font-semibold">{user.name}</h2>
-              <p className="text-gray-500">{user.role}</p>
-              <button
-                onClick={() => setIsEditingPassword(true)}
-                className="mt-4 flex items-center justify-center gap-2 w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-md transition-colors"
-              >
-                <Lock size={16} />
-                <span>Ubah Password</span>
-              </button>
-            </div>
-          </div>
-        </div>
-        
         {/* Right column - User details */}
         <div className="md:col-span-2">
           <div className="bg-white rounded-lg shadow p-6">
@@ -193,7 +151,7 @@ export default function ProfilePage() {
               </div>
               <div>
                 <p className="text-sm text-gray-500">Departemen</p>
-                <div className="text-sm text-gray-600">{user.department?.name || 'No Department'}</div>
+                <div className="font-medium">{user.department?.name || 'No Department'}</div>
               </div>
             </div>
           </div>

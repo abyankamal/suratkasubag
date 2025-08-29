@@ -97,8 +97,6 @@ export default function ChangePasswordForm({ onCancel }: ChangePasswordFormProps
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-medium text-gray-900">Ubah Password</h2>
-      
       {/* Success Message */}
       {successMessage && (
         <Alert className="mb-4 bg-green-50 border-green-200">
@@ -224,7 +222,7 @@ export default function ChangePasswordForm({ onCancel }: ChangePasswordFormProps
           </Button>
           <Button 
             type="submit" 
-            className="bg-blue-600 hover:bg-blue-700"
+            className="text-black"
             disabled={processing}
           >
             {processing ? 'Menyimpan...' : 'Simpan Perubahan'}

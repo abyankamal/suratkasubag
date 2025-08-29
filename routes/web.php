@@ -48,33 +48,19 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar.update');
     });
     
-    // Routes for both admin and user roles
-    Route::get('reports/{id}/download', [ReportController::class, 'download'])->name('reports.download');
-    
+    // Reports routes - accessible by all authenticated users with authorization in controller
+    Route::resource('reports', ReportController::class);
+    Route::get('reports/{report}/download', [ReportController::class, 'download'])->name('reports.download');
+
     // Admin-only routes
     Route::middleware(['role:admin'])->group(function () {
         // Users management
         Route::resource('users', UserController::class)->except(['create', 'edit']);
-        
+
         // Departments management
         Route::resource('departments', DepartmentController::class);
-        
+
         // Positions management
         Route::resource('positions', PositionController::class);
-        
-        // Admin reports access
-        Route::resource('reports', ReportController::class);
-    });
-    
-    // User-only routes
-    Route::middleware(['role:user'])->group(function () {
-        // User can only see their own reports
-        Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
-        Route::get('reports/create', [ReportController::class, 'create'])->name('reports.create');
-        Route::post('reports', [ReportController::class, 'store'])->name('reports.store');
-        Route::get('reports/{report}', [ReportController::class, 'show'])->name('reports.show');
-        Route::get('reports/{report}/edit', [ReportController::class, 'edit'])->name('reports.edit');
-        Route::put('reports/{report}', [ReportController::class, 'update'])->name('reports.update');
-        Route::delete('reports/{report}', [ReportController::class, 'destroy'])->name('reports.destroy');
     });
 });

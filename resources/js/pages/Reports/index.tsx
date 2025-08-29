@@ -262,13 +262,13 @@ export default function ReportsPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Daftar Laporan</h1>
           {!isAdmin && (
-            <Button 
-              variant="default" 
+            <Button
+              variant="default"
               className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2"
               onClick={handleAddNew}
             >
               <Plus className="h-4 w-4" />
-              Tambah Surat
+              Tambah Laporan
             </Button>
           )}
         </div>
@@ -401,7 +401,7 @@ export default function ReportsPage() {
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex justify-end space-x-2">
                             <Button
-                              variant="outline" 
+                              variant="outline"
                               size="icon"
                               onClick={() => handleDownload(report.id)}
                               className="border-gray-200 hover:bg-blue-50 hover:text-blue-600"
@@ -411,7 +411,7 @@ export default function ReportsPage() {
                             </Button>
                             {!isAdmin && (
                               <Button
-                                variant="outline" 
+                                variant="outline"
                                 size="icon"
                                 onClick={() => handleEdit(report.id)}
                                 className="border-gray-200 hover:bg-yellow-50 hover:text-yellow-600"
@@ -421,7 +421,7 @@ export default function ReportsPage() {
                               </Button>
                             )}
                             <Button
-                              variant="outline" 
+                              variant="outline"
                               size="icon"
                               onClick={() => handleDelete(report.id)}
                               className="border-gray-200 hover:bg-red-50 hover:text-red-600"

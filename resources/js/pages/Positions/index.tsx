@@ -218,25 +218,25 @@ const PositionsPage: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex justify-end space-x-2">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
+                            <Button
+                              variant="outline"
+                              size="icon"
                               onClick={() => handleEdit(position)}
-                              className="text-blue-600 hover:text-blue-900"
+                              className="border-gray-200 hover:bg-blue-50 hover:text-blue-600"
+                              title="Edit"
                             >
-                              <Pencil className="h-4 w-4 mr-1" />
-                              Edit
+                              <Pencil className="h-4 w-4" />
                             </Button>
                             {isAdmin && (
-                              <Button 
-                                variant="ghost"
-                                size="sm"
+                              <Button
+                                variant="outline"
+                                size="icon"
                                 onClick={() => handleDeleteClick(position)}
                                 disabled={!!isDeleting && isDeleting === position.id}
-                                className="text-red-600 hover:text-red-900"
+                                className="border-gray-200 hover:bg-red-50 hover:text-red-600"
+                                title={isDeleting === position.id ? 'Menghapus...' : 'Hapus'}
                               >
-                                <Trash2 className="h-4 w-4 mr-1" />
-                                {isDeleting === position.id ? 'Menghapus...' : 'Hapus'}
+                                <Trash2 className="h-4 w-4" />
                               </Button>
                             )}
                           </div>

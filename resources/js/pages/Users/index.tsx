@@ -325,22 +325,24 @@ export default function UsersPage({
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex justify-end space-x-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
+                          <Button
+                            variant="outline"
+                            size="icon"
                             onClick={() => handleEditUser(user)}
-                            className="text-blue-600 hover:text-blue-900"
+                            className="border-gray-200 hover:bg-blue-50 hover:text-blue-600"
+                            title="Edit"
                           >
-                            <Pencil className="h-4 w-4 mr-1" />
+                            <Pencil className="h-4 w-4" />
                           </Button>
                           {isAdmin && (
-                            <Button 
-                              variant="ghost"
-                              size="sm"
+                            <Button
+                              variant="outline"
+                              size="icon"
                               onClick={() => handleOpenDeleteDialog(user.id)}
-                              className="text-red-600 hover:text-red-900"
+                              className="border-gray-200 hover:bg-red-50 hover:text-red-600"
+                              title="Hapus"
                             >
-                              <Trash2 className="h-4 w-4 mr-1" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           )}
                         </div>

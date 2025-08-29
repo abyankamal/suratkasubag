@@ -81,7 +81,7 @@ export default function Login() {
                 className={`w-full ${errors.username ? 'border-red-500' : ''}`}
               />
               {errors.username && (
-                <p className="text-sm text-red-500">Username tidak valid</p>
+                <p className="text-sm text-red-500">{errors.username}</p>
               )}
             </div>
 
@@ -109,7 +109,7 @@ export default function Login() {
                 </button>
               </div>
               {errors.password && (
-                <p className="text-sm text-red-500">Password tidak valid</p>
+                <p className="text-sm text-red-500">{errors.password}</p>
               )}
             </div>
 
