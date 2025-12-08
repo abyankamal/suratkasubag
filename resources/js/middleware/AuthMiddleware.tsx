@@ -8,18 +8,18 @@ interface Props {
 
 export function redirectIfUnauthenticated({ auth }: Props) {
   if (!auth.user) {
-    router.visit('/login');
+    router.visit(route('login'));
     return false;
   }
-  
+
   return true;
 }
 
 export function redirectIfAuthenticated({ auth }: Props) {
   if (auth.user) {
-    router.visit('/dashboard');
+    router.visit(route('dashboard'));
     return false;
   }
-  
+
   return true;
 }
