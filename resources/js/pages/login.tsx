@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 import { Head, usePage } from '@inertiajs/react';
 import { useForm } from '@inertiajs/react';
 import { Input } from '@/components/ui/input';
@@ -14,7 +15,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const currentYear = new Date().getFullYear();
 
-  const { data, setData, post, processing, errors } = useForm({
+  const { data, setData, post, processing, errors, reset } = useForm({
     username: '',
     password: '',
   });
@@ -49,11 +50,17 @@ export default function Login() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    post(route('login'));
+    post(route('login'), {
+      onError: (errors) => {
+        toast.error(Object.values(errors).join('\n'));
+        reset('username', 'password');
+      },
+    });
   };
 
   return (
     <>
+      <Toaster position="top-right" />
       <Head title="Login" />
 
       <div className="min-h-screen relative flex flex-col items-center justify-center overflow-hidden">
@@ -119,11 +126,8 @@ export default function Login() {
                     placeholder="Masukan Username"
                     value={data.username}
                     onChange={(e) => setData('username', e.target.value)}
-                    className={`bg-black/20 border-white/20 text-white placeholder:text-white/40 focus:bg-black/30 w-full ${errors.username ? 'border-red-400 focus:ring-red-400' : 'focus-visible:ring-blue-400 focus-visible:border-blue-400'}`}
+                    className={`bg-black/20 border-white/20 text-white placeholder:text-white/40 focus:bg-black/30 w-full focus-visible:ring-blue-400 focus-visible:border-blue-400`}
                   />
-                  {errors.username && (
-                    <p className="text-sm text-red-300 font-medium bg-red-900/40 px-2 py-1 rounded">{errors.username}</p>
-                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -149,9 +153,6 @@ export default function Login() {
                       )}
                     </button>
                   </div>
-                  {errors.password && (
-                    <p className="text-sm text-red-300 font-medium bg-red-900/40 px-2 py-1 rounded">{errors.password}</p>
-                  )}
                 </div>
 
                 <Button
