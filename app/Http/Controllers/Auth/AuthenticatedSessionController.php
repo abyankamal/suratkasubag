@@ -36,7 +36,7 @@ class AuthenticatedSessionController extends Controller
         } catch (\Illuminate\Validation\ValidationException $e) {
             $errors = $e->errors();
             $indonesianMessages = [];
-            
+
             foreach ($errors as $field => $messages) {
                 foreach ($messages as $message) {
                     if ($field === 'username' || $field === 'email') {
@@ -56,7 +56,7 @@ class AuthenticatedSessionController extends Controller
                     }
                 }
             }
-            
+
             throw \Illuminate\Validation\ValidationException::withMessages($indonesianMessages);
         }
     }

@@ -126,7 +126,7 @@ export default function Login() {
                     placeholder="Masukan Username"
                     value={data.username}
                     onChange={(e) => setData('username', e.target.value)}
-                    className={`bg-black/20 border-white/20 text-white placeholder:text-white/40 focus:bg-black/30 w-full focus-visible:ring-blue-400 focus-visible:border-blue-400`}
+                    className={`bg-black/20 border-white/20 text-white placeholder:text-white/40 focus:bg-black/30 w-full pr-10 ${errors.username ? 'border-red-400 focus:ring-red-400' : 'focus-visible:ring-blue-400 focus-visible:border-blue-400'}`}
                   />
                 </div>
 
