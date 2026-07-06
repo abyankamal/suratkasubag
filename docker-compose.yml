@@ -1,0 +1,53 @@
+services:
+  laravel.test:
+    build:
+      context: ./vendor/laravel/sail/runtimes/8.3
+      dockerfile: Dockerfile
+      args:
+        WWWGROUP: '${WWWGROUP:-1000}'
+    image: sail-8.3/app  # Ini hanya penamaan lokal hasil build nanti, bukan pull dari Docker Hub
+    platform: linux/arm64
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    ports:
+      - "80:80"
+    environment:
+      WWWUSER: '${WWWUSER:-1000}'
+      LARAVEL_SAIL: 1
+      XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
+    volumes:
+      - '.:/var/www/html'
+    networks:
+      - sail
+    depends_on:
+      - mysql
+
+# ... (Biarkan konfigurasi mysql, networks, dan volumes di bawahnya tetap sama seperti sebelumnya)
+
+  mysql:
+    image: 'mysql:8.0'
+    platform: linux/arm64
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 'secret_password'
+      MYSQL_DATABASE: 'suratkasubag'
+      MYSQL_USER: 'sail_user'
+      MYSQL_PASSWORD: 'secret_password'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    volumes:
+      - 'sail-mysql:/var/lib/mysql'
+    networks:
+      - sail
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-psecret_password"]
+      retries: 3
+      timeout: 5s
+
+networks:
+  sail:
+    driver: bridge
+
+volumes:
+  sail-mysql:
+    driver: local
