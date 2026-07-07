@@ -167,7 +167,6 @@ const DepartmentsPage: React.FC = () => {
                   placeholder="Cari departemen..."
                   onSearch={setSearchValue}
                   initialValue={searchValue}
-                  autoFocus
                 />
               </div>
             </div>

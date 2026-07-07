@@ -260,7 +260,6 @@ export default function UsersPage({
                   placeholder="Cari pengguna..."
                   onSearch={setSearchTerm}
                   initialValue={searchTerm}
-                  autoFocus
                 />
               </div>
             </div>

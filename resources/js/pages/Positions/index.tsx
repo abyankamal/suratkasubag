@@ -187,7 +187,6 @@ const PositionsPage: React.FC = () => {
                   placeholder="Cari posisi..."
                   onSearch={handleSearch}
                   initialValue={searchValue}
-                  autoFocus
                 />
               </div>
             </div>
