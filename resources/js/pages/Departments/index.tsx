@@ -63,18 +63,20 @@ const DepartmentsPage: React.FC = () => {
   const isAdmin = auth.user?.role === 'admin';
 
 
-  // Handle search with debounce
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      router.get(
-        route('departments.index'), 
-        { search: searchValue, page: 1 }, // Reset to first page on new search
-        { preserveState: true, preserveScroll: true }
-      );
-    }, 500);
-    
-    return () => clearTimeout(timer);
-  }, [searchValue]);
+  // Handle search
+  const handleSearch = (value: string) => {
+    setSearchValue(value);
+    const params: any = {};
+    if (value.trim()) {
+      params.search = value;
+      params.page = 1;
+    }
+    router.get(
+      route('departments.index'), 
+      params,
+      { preserveState: true, replace: true, preserveScroll: true }
+    );
+  };
 
   // Handle page change
   const handlePageChange = (page: number) => {
@@ -158,20 +160,22 @@ const DepartmentsPage: React.FC = () => {
           )}
         </div>
 
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="p-6">
+        <div className="bg-white rounded-lg shadow w-full max-w-full overflow-hidden">
+          <div className="p-4 sm:p-6 w-full">
             <div className="flex items-center space-x-2 mb-4">
               <div className="relative flex-grow">
                 <Search
-                  label="Pencarian"
                   placeholder="Cari departemen..."
-                  onSearch={setSearchValue}
+                  onSearch={handleSearch}
                   initialValue={searchValue}
                 />
               </div>
             </div>
 
-            <div className="overflow-x-auto">
+            <div 
+              className="overflow-x-auto w-full rounded-md border border-gray-100 pb-2 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-gray-400 transition-colors"
+              style={{ WebkitOverflowScrolling: 'touch' }}
+            >
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>

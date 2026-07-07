@@ -36,9 +36,10 @@ export default function UsersPage({
   departments = [],
   positions = [],
   errors = {},
+  filters = {},
   ...props 
-}: UsersPageProps) {
-  const [searchTerm, setSearchTerm] = useState('');
+}: UsersPageProps & { filters?: { search?: string } }) {
+  const [searchTerm, setSearchTerm] = useState(filters?.search || '');
   const [selectedUser, setSelectedUser] = useState<UserFormData | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<number | null>(null);
@@ -81,21 +82,19 @@ export default function UsersPage({
   // Pagination constants
   const ITEMS_PER_PAGE = 10;
   
-  // Filter users based on search term
-  const filteredUsers = currentItems.filter((user: any) => {
-    if (!searchTerm) return true;
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      user.name.toLowerCase().includes(searchLower) ||
-      user.username.toLowerCase().includes(searchLower) ||
-      user.role.toLowerCase().includes(searchLower) ||
-      (user.department && user.department.toLowerCase().includes(searchLower)) ||
-      (user.position && user.position.toLowerCase().includes(searchLower))
+  // Handle search by navigating with Inertia
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+    const params: any = {};
+    if (value.trim()) {
+      params.search = value;
+    }
+    router.get(
+      route('users.index'),
+      params,
+      { preserveState: true, replace: true, preserveScroll: true }
     );
-  });
-  
-  // Use filtered users or all users if no search term
-  const displayUsers = searchTerm ? filteredUsers : currentItems;
+  };
 
   const loading = false; // Loading is handled by Inertia
 
@@ -251,20 +250,22 @@ export default function UsersPage({
           )}
         </div>
 
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="p-6">
+        <div className="bg-white rounded-lg shadow w-full max-w-full overflow-hidden">
+          <div className="p-4 sm:p-6 w-full">
             <div className="flex items-center space-x-2 mb-4">
               <div className="relative flex-grow">
                 <Search
-                  label="Pencarian"
                   placeholder="Cari pengguna..."
-                  onSearch={setSearchTerm}
+                  onSearch={handleSearch}
                   initialValue={searchTerm}
                 />
               </div>
             </div>
 
-            <div className="overflow-x-auto">
+            <div 
+              className="overflow-x-auto w-full rounded-md border border-gray-100 pb-2 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-gray-400 transition-colors"
+              style={{ WebkitOverflowScrolling: 'touch' }}
+            >
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
@@ -278,14 +279,14 @@ export default function UsersPage({
                   </tr>
                 </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {displayUsers.length === 0 ? (
+                {currentItems.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">
                       Tidak ada data pengguna
                     </td>
                   </tr>
                 ) : (
-                  displayUsers.map((user: any, index: number) => (
+                  currentItems.map((user: any, index: number) => (
                     <tr key={user.id} className="hover:bg-gray-50">
                       <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                           {from + index}

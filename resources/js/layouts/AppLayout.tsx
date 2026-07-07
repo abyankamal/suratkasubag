@@ -200,7 +200,7 @@ export default function AppLayout({ auth, header, children }: AppLayoutProps) {
             </header>
             
             {/* Page Content */}
-            <main className="flex-1 overflow-y-auto bg-gray-50 p-4 sm:p-6">
+            <main className="flex-1 overflow-y-auto overflow-x-hidden bg-gray-50 p-4 sm:p-6 w-full max-w-full min-w-0">
                 <div className="max-w-7xl mx-auto w-full">
                     {children}
                 </div>
@@ -230,7 +230,7 @@ export default function AppLayout({ auth, header, children }: AppLayoutProps) {
                 />
             )}
             
-            <div className="flex w-full">
+            <div className="flex w-full min-w-0">
                 {/* Desktop sidebar */}
                 <div className="hidden md:block md:flex-shrink-0 md:w-64">
                     <div className="flex flex-col h-full border-r border-gray-200 bg-white overflow-y-auto">

@@ -50,26 +50,12 @@ interface PaginatedData<T> {
 
 const PositionsPage: React.FC = () => {
   const { positions, auth } = usePage<PageProps>().props;
-  const [searchValue, setSearchValue] = useState('');
+  const [searchValue, setSearchValue] = useState(positions.filters?.search || '');
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<Position | null>(null);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [positionToDelete, setPositionToDelete] = useState<Position | null>(null);
-  const [filteredPositions, setFilteredPositions] = useState<Position[]>(positions.data || []);
-  
-  // Handle search with debounce
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      router.get(
-        route('positions.index'), 
-        { search: searchValue, page: 1 }, // Reset to first page on search
-        { preserveState: true, preserveScroll: true }
-      );
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [searchValue]);
   
   const currentPage = positions?.current_page || 1;
   const lastPage = positions?.last_page || 1;
@@ -78,6 +64,16 @@ const PositionsPage: React.FC = () => {
   // Handle search
   const handleSearch = (value: string) => {
     setSearchValue(value);
+    const params: any = {};
+    if (value.trim()) {
+      params.search = value;
+      params.page = 1;
+    }
+    router.get(
+      route('positions.index'), 
+      params,
+      { preserveState: true, replace: true, preserveScroll: true }
+    );
   };
 
   // Handle page change
@@ -178,12 +174,11 @@ const PositionsPage: React.FC = () => {
           )}
         </div>
 
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="p-6">
+        <div className="bg-white rounded-lg shadow w-full max-w-full overflow-hidden">
+          <div className="p-4 sm:p-6 w-full">
             <div className="flex items-center space-x-2 mb-4">
               <div className="relative flex-grow">
                 <Search
-                  label="Pencarian"
                   placeholder="Cari posisi..."
                   onSearch={handleSearch}
                   initialValue={searchValue}
@@ -191,7 +186,10 @@ const PositionsPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
+            <div 
+              className="overflow-x-auto w-full rounded-md border border-gray-100 pb-2 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-gray-400 transition-colors"
+              style={{ WebkitOverflowScrolling: 'touch' }}
+            >
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>

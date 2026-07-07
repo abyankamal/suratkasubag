@@ -5,11 +5,6 @@ import { Search as SearchIcon, X } from 'lucide-react';
 
 interface SearchProps {
   /**
-   * Optional label for the search input
-   */
-  label?: string;
-  
-  /**
    * Placeholder text for the search input
    */
   placeholder?: string;
@@ -59,7 +54,6 @@ interface SearchProps {
  * Reusable search component with debounce functionality
  */
 const Search: React.FC<SearchProps> = ({
-  label,
   placeholder = 'Search...',
   minChars = 0,
   debounceTime = 300,
@@ -88,9 +82,16 @@ const Search: React.FC<SearchProps> = ({
     }
   }, [autoFocus]);
 
+  const isFirstRender = useRef(true);
+
   // Handle input change with debounce (only for onSearch callback)
   useEffect(() => {
     if (!onSearch) return;
+    
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     
     const handler = setTimeout(() => {
       // Only trigger search if input meets minimum character requirement
@@ -142,11 +143,6 @@ const Search: React.FC<SearchProps> = ({
 
   return (
     <div className={`w-full flex flex-col ${className}`}>
-      {label && (
-        <label className="block text-xs text-gray-500 mb-1 font-medium">
-          {label}
-        </label>
-      )}
       <form onSubmit={handleSubmit} className="relative w-full">
         <div className="relative flex items-center w-full">
           <SearchIcon className="absolute left-3 h-4 w-4 text-muted-foreground" />
