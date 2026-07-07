@@ -12,6 +12,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { format } from "date-fns";
+import { FileText, Calendar, Plus, Pencil } from "lucide-react";
 
 // Define the Report type
 export interface Report {
@@ -47,16 +48,16 @@ interface ReportFormProps {
 
 const ReportForm: React.FC<ReportFormProps> = ({
   open,
-  onOpenChange = () => {},
+  onOpenChange = () => { },
   mode,
   onSubmit,
   selectedReport,
 }) => {
-  const { data, setData, reset, processing, errors, clearErrors } = useForm<FormDataState>({
+  const { data, setData, reset, processing, errors, setError, clearErrors } = useForm<FormDataState>({
     title: selectedReport?.title || "",
     file: null,
     filename: selectedReport?.filename || "",
-    date: selectedReport?.date || new Date().toISOString().split('T')[0], // Default to today's date
+    date: selectedReport?.date ? selectedReport.date.substring(0, 10) : new Date().toISOString().split('T')[0], // Default to today's date (YYYY-MM-DD)
   });
 
   // Reset form when selectedReport changes or modal is closed
@@ -66,36 +67,41 @@ const ReportForm: React.FC<ReportFormProps> = ({
         title: selectedReport.title,
         file: null,
         filename: selectedReport.filename || "",
-        date: selectedReport.date || new Date().toISOString().split('T')[0],
+        date: selectedReport.date ? selectedReport.date.substring(0, 10) : new Date().toISOString().split('T')[0],
       });
     } else if (!open) {
       reset();
+      clearErrors();
     }
   }, [selectedReport, mode, open, reset, setData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     clearErrors();
-    
+
     // Client-side validation
     const newErrors: Record<string, string> = {};
-    
+
     if (!data.title.trim()) {
       newErrors.title = 'Judul laporan wajib diisi';
     } else if (data.title.length > 255) {
       newErrors.title = 'Judul laporan maksimal 255 karakter';
     }
-    
+
     if (mode === 'create' && !data.file) {
       newErrors.file = 'File laporan wajib diunggah';
     }
-    
+
+    if (!data.date) {
+      newErrors.date = 'Tanggal surat wajib diisi';
+    }
+
     if (Object.keys(newErrors).length > 0) {
       // @ts-ignore - Inertia's setError expects this format
       Object.entries(newErrors).forEach(([key, message]) => setError(key, message));
       return;
     }
-    
+
     const formData = new FormData();
     formData.append("title", data.title);
     formData.append("date", data.date);
@@ -155,24 +161,31 @@ const ReportForm: React.FC<ReportFormProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-white">
-        <DialogHeader>
-          <DialogTitle>
+      <DialogContent
+        className="sm:max-w-md bg-white"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
+        <DialogHeader className="space-y-1.5 pb-2">
+          <DialogTitle className="text-xl font-bold text-gray-800">
             {mode === "create" ? "Tambah Laporan Baru" : "Edit Laporan"}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-gray-500 text-sm">
             {mode === "create"
-              ? "Isi formulir untuk menambahkan laporan baru."
-              : "Perbarui informasi laporan."}
+              ? "Isi formulir di bawah ini untuk mengunggah dokumen laporan baru."
+              : "Sesuaikan kembali informasi dokumen laporan yang diperlukan."}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <div className="flex justify-between items-center">
-              <Label htmlFor="title">Judul Laporan</Label>
+              <Label htmlFor="title" className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                Judul Laporan
+              </Label>
               {errors.title && (
-                <span className="text-xs text-red-500">{errors.title}</span>
+                <span className="text-xs font-medium text-red-500 bg-red-50 px-2 py-0.5 rounded-full border border-red-100 animate-pulse">
+                  {errors.title}
+                </span>
               )}
             </div>
             <Input
@@ -183,7 +196,36 @@ const ReportForm: React.FC<ReportFormProps> = ({
                 if (errors.title) clearErrors('title');
               }}
               placeholder="Masukkan judul laporan"
-              className={errors.title ? 'border-red-500' : ''}
+              className={`h-10 border transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-100 focus-visible:border-blue-500 ${errors.title
+                ? 'border-red-300 bg-red-50/10 focus-visible:ring-red-100 focus-visible:border-red-500'
+                : 'border-gray-200 bg-gray-50/30 hover:border-gray-300'
+                }`}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center">
+              <Label htmlFor="date" className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                Tanggal Surat
+              </Label>
+              {errors.date && (
+                <span className="text-xs font-medium text-red-500 bg-red-50 px-2 py-0.5 rounded-full border border-red-100 animate-pulse">
+                  {errors.date}
+                </span>
+              )}
+            </div>
+            <Input
+              id="date"
+              type="date"
+              value={data.date}
+              onChange={(e) => {
+                setData("date", e.target.value);
+                if (errors.date) clearErrors('date');
+              }}
+              className={`h-10 border transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-100 focus-visible:border-blue-500 ${errors.date
+                ? 'border-red-300 bg-red-50/10 focus-visible:ring-red-100 focus-visible:border-red-500'
+                : 'border-gray-200 bg-gray-50/30 hover:border-gray-300'
+                }`}
             />
           </div>
 
@@ -249,12 +291,22 @@ const ReportForm: React.FC<ReportFormProps> = ({
             >
               Batal
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={processing}
-              className="bg-blue-500 hover:bg-blue-600 text-white"
+              className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2"
             >
-              {processing ? 'Memproses...' : mode === "create" ? "Simpan" : "Perbarui"}
+              {processing ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Memproses...</span>
+                </>
+              ) : (
+                mode === "create" ? "Simpan" : "Perbarui"
+              )}
             </Button>
           </DialogFooter>
         </form>

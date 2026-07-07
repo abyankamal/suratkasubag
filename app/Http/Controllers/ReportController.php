@@ -175,14 +175,20 @@ class ReportController extends Controller
         // Store the file
         $path = $file->storeAs('reports', $storedName, 'public');
         
-        // Create report record with the title field mapped to filename
-        $report = Report::create([
+        // Create report record with the title field mapped to filename and set date if provided
+        $report = new Report([
             'filename' => $request->title, // Map title to filename
             'stored_name' => $storedName,
             'path' => $path,
             'size' => $file->getSize(),
             'user_id' => Auth::id(),
         ]);
+
+        if ($request->has('date') && !empty($request->date)) {
+            $report->created_at = $request->date;
+        }
+
+        $report->save();
 
         return redirect()->route('reports.index')->with('success', 'Laporan berhasil ditambahkan');
     }
@@ -223,6 +229,9 @@ class ReportController extends Controller
         
         // Update report data
         $report->filename = $request->title; // Map title to filename
+        if ($request->has('date') && !empty($request->date)) {
+            $report->created_at = $request->date;
+        }
 
         // If new file is uploaded
         if ($request->hasFile('file')) {

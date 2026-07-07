@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
 import { Button } from "@/components/ui/button";
 import { Download, Trash2, Plus, Pencil, AlertTriangle } from "lucide-react";
@@ -88,27 +88,28 @@ export default function ReportsPage() {
   // Get unique uploaders for filter
   const uploaders = [...new Set(reports.map(report => report.uploader))];
 
-  // State for storing the input value before filtering
-  const [searchInputValue, setSearchInputValue] = useState(searchInput);
-  
   // Delete confirmation dialog state
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [reportToDelete, setReportToDelete] = useState<number | null>(null);
   
+  // Use a ref to prevent searching on initial mount
+  const isMounted = useRef(false);
+
   // Apply filtering only when user has finished typing (debounced)
   useEffect(() => {
+    // Skip the first render to prevent automatic searching on page load
+    if (!isMounted.current) {
+      isMounted.current = true;
+      return;
+    }
+
     // Apply debouncing for better performance
     const handler = setTimeout(() => {
-      // Update the actual search filter value after debounce
-      if (searchInputValue !== searchInput) {
-        applyFilters({ search: searchInputValue });
-      }
-    }, 500); // Increased debounce time for better user experience
+      applyFilters({ search: searchInput });
+    }, 500);
     
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [searchInputValue]);
+    return () => clearTimeout(handler);
+  }, [searchInput]);
 
   // Function to apply filters and reload data from server
   const applyFilters = useCallback((newFilters?: Record<string, any>) => {
@@ -279,12 +280,9 @@ export default function ReportsPage() {
             <div className="flex-1">
               <Search
                 placeholder="Cari laporan..."
-                initialValue={searchInputValue}
-                onSearch={(value) => setSearchInputValue(value)}
-                minChars={0}
-                debounceTime={300}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 className="w-full"
-                autoFocus={true}
               />
             </div>
 
