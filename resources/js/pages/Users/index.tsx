@@ -256,6 +256,7 @@ export default function UsersPage({
             <div className="flex items-center space-x-2 mb-4">
               <div className="relative flex-grow">
                 <Search
+                  label="Pencarian"
                   placeholder="Cari pengguna..."
                   onSearch={setSearchTerm}
                   initialValue={searchTerm}

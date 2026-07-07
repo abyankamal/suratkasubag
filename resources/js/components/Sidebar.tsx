@@ -48,8 +48,19 @@ export function Sidebar() {
   const { auth } = usePage<SharedData>().props;
   const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
   
+  // Helper to extract pathname from absolute URL (e.g. "http://localhost/dashboard" -> "/dashboard")
+  const getPathname = (urlStr: string) => {
+    try {
+      if (urlStr.startsWith('http://') || urlStr.startsWith('https://') || urlStr.includes('://')) {
+        return new URL(urlStr).pathname;
+      }
+    } catch (e) {}
+    return urlStr;
+  };
+
   // Enhanced isActive function to handle exact and nested routes
-  const isActive = (path: string, exact: boolean = false) => {
+  const isActive = (urlStr: string, exact: boolean = false) => {
+    const path = getPathname(urlStr);
     if (exact) {
       return currentPath === path;
     }
@@ -61,7 +72,8 @@ export function Sidebar() {
   };
   
   // Helper function to determine if any of the child routes are active
-  const isChildActive = (path: string) => {
+  const isChildActive = (urlStr: string) => {
+    const path = getPathname(urlStr);
     return currentPath !== path && currentPath.startsWith(path + '/');
   };
 

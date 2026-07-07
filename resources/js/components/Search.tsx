@@ -5,6 +5,11 @@ import { Search as SearchIcon, X } from 'lucide-react';
 
 interface SearchProps {
   /**
+   * Optional label for the search input
+   */
+  label?: string;
+  
+  /**
    * Placeholder text for the search input
    */
   placeholder?: string;
@@ -54,6 +59,7 @@ interface SearchProps {
  * Reusable search component with debounce functionality
  */
 const Search: React.FC<SearchProps> = ({
+  label,
   placeholder = 'Search...',
   minChars = 0,
   debounceTime = 300,
@@ -135,30 +141,37 @@ const Search: React.FC<SearchProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className={`relative ${className}`}>
-      <div className="relative flex items-center">
-        <SearchIcon className="absolute left-3 h-4 w-4 text-muted-foreground" />
-        <Input
-          ref={searchInputRef}
-          type="text"
-          placeholder={placeholder}
-          value={value !== undefined ? value : inputValue}
-          onChange={handleChange}
-          className="pl-9 pr-10"
-        />
-        {inputValue && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="absolute right-0 h-full px-3"
-            onClick={handleClear}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
-    </form>
+    <div className={`w-full flex flex-col ${className}`}>
+      {label && (
+        <label className="block text-xs text-gray-500 mb-1 font-medium">
+          {label}
+        </label>
+      )}
+      <form onSubmit={handleSubmit} className="relative w-full">
+        <div className="relative flex items-center w-full">
+          <SearchIcon className="absolute left-3 h-4 w-4 text-muted-foreground" />
+          <Input
+            ref={searchInputRef}
+            type="text"
+            placeholder={placeholder}
+            value={value !== undefined ? value : inputValue}
+            onChange={handleChange}
+            className="pl-9 pr-10 w-full"
+          />
+          {inputValue && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="absolute right-0 h-full px-3"
+              onClick={handleClear}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </form>
+    </div>
   );
 };
 

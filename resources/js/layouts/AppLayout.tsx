@@ -252,7 +252,6 @@ export default function AppLayout({ auth, header, children }: AppLayoutProps) {
                         <div className="flex-1">
                             <Sidebar />
                         </div>
-                        <UserProfileDropdown />
                     </div>
                 </div>
                 

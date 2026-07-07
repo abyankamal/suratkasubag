@@ -183,6 +183,7 @@ const PositionsPage: React.FC = () => {
             <div className="flex items-center space-x-2 mb-4">
               <div className="relative flex-grow">
                 <Search
+                  label="Pencarian"
                   placeholder="Cari posisi..."
                   onSearch={handleSearch}
                   initialValue={searchValue}

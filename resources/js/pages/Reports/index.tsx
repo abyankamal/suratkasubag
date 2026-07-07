@@ -279,6 +279,7 @@ export default function ReportsPage() {
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
               <Search
+                label="Pencarian"
                 placeholder="Cari laporan..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
