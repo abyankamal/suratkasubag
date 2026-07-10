@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useForm } from "@inertiajs/react";
-import { Briefcase } from "lucide-react";
+import { Briefcase, Save, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -147,13 +147,17 @@ const PositionForm: React.FC<PositionFormProps> = ({
               variant="outline" 
               onClick={() => onOpenChange(false)}
               disabled={processing}
+              className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
             >
+              <X className="w-4 h-4 mr-2" />
               Batal
             </Button>
             <Button 
               type="submit" 
               disabled={processing}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
             >
+              <Save className="w-4 h-4 mr-2" />
               {processing ? 'Memproses...' : mode === "create" ? "Simpan" : "Perbarui"}
             </Button>
           </DialogFooter>

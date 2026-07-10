@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useForm } from '@inertiajs/react';
-import { User, Mail, Key, UserPlus, UserCog } from 'lucide-react';
+import { User, Mail, Key, UserPlus, UserCog, Save, X } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -674,10 +674,17 @@ const UserForm: React.FC<UserFormProps> = ({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={processing}
+              className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
             >
+              <X className="w-4 h-4 mr-2" />
               Batal
             </Button>
-            <Button type="submit" disabled={processing}>
+            <Button 
+              type="submit" 
+              disabled={processing}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Save className="w-4 h-4 mr-2" />
               {mode === 'update' ? 'Perbarui' : 'Simpan'}
             </Button>
           </DialogFooter>

@@ -51,6 +51,7 @@ Route::middleware(['auth'])->group(function () {
     // Reports routes - accessible by all authenticated users with authorization in controller
     Route::resource('reports', ReportController::class);
     Route::get('reports/{report}/download', [ReportController::class, 'download'])->name('reports.download');
+    Route::get('reports/{report}/view', [ReportController::class, 'viewFile'])->name('reports.view');
 
     // Admin-only routes
     Route::middleware(['role:admin'])->group(function () {

@@ -309,4 +309,23 @@ class ReportController extends Controller
         
         return back()->with('error', 'File tidak ditemukan');
     }
+
+    /**
+     * View the specified report file in the browser.
+     *
+     * @param  int  $report
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse|\Illuminate\Http\RedirectResponse
+     */
+    public function viewFile($report)
+    {
+        $report = Report::findOrFail($report);
+        
+        $filePath = storage_path('app/public/' . $report->path);
+        
+        if (file_exists($filePath)) {
+            return response()->file($filePath);
+        }
+        
+        return back()->with('error', 'File tidak ditemukan');
+    }
 }

@@ -12,7 +12,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { format } from "date-fns";
-import { FileText, Calendar, Plus, Pencil } from "lucide-react";
+import { FileText, Calendar, Plus, Pencil, Save, X } from "lucide-react";
 
 // Define the Report type
 export interface Report {
@@ -206,7 +206,7 @@ const ReportForm: React.FC<ReportFormProps> = ({
           <div className="space-y-1.5">
             <div className="flex justify-between items-center">
               <Label htmlFor="date" className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                Tanggal Surat
+                Tanggal Laporan
               </Label>
               {errors.date && (
                 <span className="text-xs font-medium text-red-500 bg-red-50 px-2 py-0.5 rounded-full border border-red-100 animate-pulse">
@@ -288,13 +288,15 @@ const ReportForm: React.FC<ReportFormProps> = ({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={processing}
+              className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
             >
+              <X className="w-4 h-4 mr-2" />
               Batal
             </Button>
             <Button
               type="submit"
               disabled={processing}
-              className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2"
+              className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
             >
               {processing ? (
                 <>
@@ -305,7 +307,10 @@ const ReportForm: React.FC<ReportFormProps> = ({
                   <span>Memproses...</span>
                 </>
               ) : (
-                mode === "create" ? "Simpan" : "Perbarui"
+                <>
+                  <Save className="w-4 h-4" />
+                  <span>{mode === "create" ? "Simpan" : "Perbarui"}</span>
+                </>
               )}
             </Button>
           </DialogFooter>

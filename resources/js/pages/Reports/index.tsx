@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
 import { Button } from "@/components/ui/button";
-import { Download, Trash2, Plus, Pencil, AlertTriangle } from "lucide-react";
+import { Download, Trash2, Plus, Pencil, AlertTriangle, Eye } from "lucide-react";
 import Search from "@/components/Search";
 import ReportForm, { Report as FormReport } from "@/pages/Reports/Form";
 import { Pagination } from "@/components/Pagination";
@@ -152,6 +152,10 @@ export default function ReportsPage() {
 
   const handleDownload = (id: number) => {
     window.open(route('reports.download', id), '_blank');
+  };
+
+  const handleView = (id: number) => {
+    window.open(route('reports.view', id), '_blank');
   };
 
   // Function to open delete confirmation dialog
@@ -398,6 +402,15 @@ export default function ReportsPage() {
                         )}
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex justify-end space-x-2">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => handleView(report.id)}
+                              className="border-gray-200 hover:bg-green-50 hover:text-green-600"
+                              title="Lihat"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
                             <Button
                               variant="outline"
                               size="icon"
