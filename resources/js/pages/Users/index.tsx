@@ -1,23 +1,29 @@
 import { useState, useEffect } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Edit, Trash2, UserPlus, Pencil } from 'lucide-react';
+import { toast } from 'sonner';
+import { Trash2, UserPlus, Pencil, Users as UsersIcon } from 'lucide-react';
+import AppLayout from '@/layouts/AppLayout';
 import Search from '@/components/Search';
 import { Pagination } from '@/components/Pagination';
-import { toast } from 'sonner';
-import UserForm from '@/pages/Users/Form';
-import AppLayout from '@/layouts/AppLayout';
 import DeleteConfirmationDialog from '@/components/DeleteConfirmationDialog';
-import { 
-  UserType, 
-  DepartmentType, 
-  PositionType, 
+import { UserAvatar } from '@/components/UserAvatar';
+import UserForm from '@/pages/Users/Form';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  UserType,
   UserFormData,
   UsersPageProps,
-  PaginatedResponse
 } from '@/types/user';
 
-// Default pagination data
 const defaultPagination = {
   data: [],
   current_page: 1,
@@ -26,18 +32,16 @@ const defaultPagination = {
   last_page: 1,
   from: 0,
   to: 0,
-  links: []
+  links: [],
 };
 
-// Extend the base page props with our custom props
-export default function UsersPage({ 
-  auth, 
+export default function UsersPage({
+  auth,
   users = defaultPagination,
   departments = [],
   positions = [],
   errors = {},
   filters = {},
-  ...props 
 }: UsersPageProps & { filters?: { search?: string } }) {
   const [searchTerm, setSearchTerm] = useState(filters?.search || '');
   const [selectedUser, setSelectedUser] = useState<UserFormData | null>(null);
@@ -45,127 +49,86 @@ export default function UsersPage({
   const [userToDelete, setUserToDelete] = useState<number | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  
-  // Get flash messages from Inertia
+
   const { flash } = usePage().props as any;
-  
-  // Show toast notifications for flash messages
+
   useEffect(() => {
     if (flash?.success) {
       toast.success(flash.success);
     }
-    
     if (flash?.error) {
       toast.error(flash.error);
     }
   }, [flash]);
-  
-  // Extract pagination data with defaults
+
   const {
     data = [],
     current_page = 1,
     per_page = 10,
     total = 0,
-    last_page = 1,
     from = 0,
-    to = 0,
-    links = []
   } = users;
-  
+
   const isAdmin = auth.user?.role === 'admin';
-  // Show pagination if there's more than one page
-  const hasPagination = total > per_page;
-  
-  // Get the current page items
   const currentItems = data || [];
-  
-  // Pagination constants
-  const ITEMS_PER_PAGE = 10;
-  
-  // Handle search by navigating with Inertia
+
   const handleSearch = (value: string) => {
     setSearchTerm(value);
-    const params: any = {};
+    const params: Record<string, string> = {};
     if (value.trim()) {
       params.search = value;
     }
-    router.get(
-      route('users.index'),
-      params,
-      { preserveState: true, replace: true, preserveScroll: true }
-    );
+    router.get(route('users.index'), params, {
+      preserveState: true,
+      replace: true,
+      preserveScroll: true,
+    });
   };
 
-  const loading = false; // Loading is handled by Inertia
-
-  // Map API user to form data with proper type conversion
-  const mapApiUserToFormData = (user: UserType): UserFormData => {
-    const formData: UserFormData = {
-      id: user.id,
-      name: user.name,
-      username: user.username,
-      role: user.role,
-      password: '',
-      password_confirmation: '',
-      avatar: user.avatar || null,
-      // Handle both possible property names for department ID
-      department_id: user.department_id?.toString() || 
-                     (user.department?.id ? user.department.id.toString() : ''),
-      // Handle both possible property names for position ID
-      position_id: user.position_id?.toString() || 
-                  (user.position?.id ? user.position.id.toString() : '')
-    };
-    
-    return formData;
-  };
-
-  const [formData, setFormData] = useState<UserFormData>({
-    name: '',
-    username: '',
-    role: 'user',
+  const mapApiUserToFormData = (user: UserType): UserFormData => ({
+    id: user.id,
+    name: user.name,
+    username: user.username,
+    role: user.role,
     password: '',
     password_confirmation: '',
-    avatar: null,
-    departement_id: '',
-    position_id: ''
+    avatar: user.avatar || null,
+    department_id:
+      user.department_id?.toString() ||
+      (typeof user.department === 'object' && user.department?.id
+        ? user.department.id.toString()
+        : ''),
+    position_id:
+      user.position_id?.toString() ||
+      (typeof user.position === 'object' && user.position?.id
+        ? user.position.id.toString()
+        : ''),
   });
 
-  // Update form data when  // Handle edit user
   const handleEditUser = (user: UserType) => {
-    const formData = mapApiUserToFormData(user);
-    setSelectedUser(formData);
+    setSelectedUser(mapApiUserToFormData(user));
     setIsFormOpen(true);
   };
 
-  // Handle form submission
-  const handleSubmit = (formData: UserFormData) => {
-    const url = formData.id 
-      ? route('users.update', formData.id)
+  const handleSubmit = (submittedData: UserFormData) => {
+    const url = submittedData.id
+      ? route('users.update', submittedData.id)
       : route('users.store');
-    
-    const method = formData.id ? 'put' : 'post';
-    
-    // Ensure required fields are present
-    if (!formData.name || !formData.username || !formData.role) {
+
+    const method = submittedData.id ? 'put' : 'post';
+
+    if (!submittedData.name || !submittedData.username || !submittedData.role) {
       toast.error('Harap isi semua kolom yang wajib diisi');
       return;
     }
-    
-    // Prepare form data with correct field names
-    const formDataToSend = {
-      ...formData,
-      // Keep departement_id as is since backend expects it with this spelling
-      // We don't need to map or remove fields here
-    };
 
     const form = new FormData();
-    
-    // Append all fields with proper type handling
-    Object.entries(formDataToSend).forEach(([key, value]) => {
+
+    Object.entries(submittedData).forEach(([key, value]) => {
       if (value !== null && value !== undefined && value !== '') {
         if (value instanceof File) {
           form.append(key, value);
-        } else if (typeof value === 'object' && value !== null) {
+        } else if (typeof value === 'object') {
           form.append(key, JSON.stringify(value));
         } else {
           form.append(key, String(value));
@@ -173,14 +136,13 @@ export default function UsersPage({
       }
     });
 
-    // Add _method for Laravel to handle PUT/PATCH requests
     if (method !== 'post') {
       form.append('_method', method);
     }
 
     router.post(url, form, {
       onSuccess: () => {
-        toast.success(`Pengguna berhasil ${formData.id ? 'diperbarui' : 'dibuat'}`);
+        toast.success(`Pengguna berhasil ${submittedData.id ? 'diperbarui' : 'dibuat'}`);
         setIsFormOpen(false);
         setSelectedUser(null);
       },
@@ -191,25 +153,26 @@ export default function UsersPage({
     });
   };
 
-  // Handle page change
   const handlePageChange = (page: number) => {
-    router.get(route('users.index'), { page }, {
-      preserveState: true,
-      only: ['users'],
-      replace: true
-    });
+    router.get(
+      route('users.index'),
+      { page, search: searchTerm || undefined },
+      {
+        preserveState: true,
+        only: ['users'],
+        replace: true,
+      }
+    );
   };
 
-  // Open delete confirmation dialog
   const handleOpenDeleteDialog = (id: number) => {
     setUserToDelete(id);
     setIsDeleteDialogOpen(true);
   };
-  
-  // Delete user after confirmation
+
   const handleConfirmDelete = () => {
     if (!userToDelete) return;
-    
+
     setIsDeleting(true);
     router.delete(route('users.destroy', userToDelete), {
       preserveScroll: true,
@@ -217,160 +180,203 @@ export default function UsersPage({
         setIsDeleting(false);
         setIsDeleteDialogOpen(false);
         setUserToDelete(null);
-      }
+      },
     });
   };
 
   return (
-    <AppLayout 
-      auth={auth}
-      header="Daftar User"
-    >
-      <Head title="Daftar User" />
-      
+    <AppLayout auth={auth} header="Daftar Pengguna">
+      <Head title="Daftar Pengguna" />
+
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Daftar Pengguna</h1>
-            <p className="text-muted-foreground">
+            <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+              Daftar Pengguna
+            </h2>
+            <p className="text-sm text-muted-foreground">
               Kelola data pengguna yang ada di sistem
             </p>
           </div>
           {isAdmin && (
-            <Button 
+            <Button
               onClick={() => {
                 setSelectedUser(null);
                 setIsFormOpen(true);
               }}
-              className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2"
+              className="self-start sm:self-auto"
             >
-              <UserPlus className="h-4 w-4" />
-              Tambah Pengguna
+              <UserPlus className="h-4 w-4" strokeWidth={1.5} />
+              <span>Tambah Pengguna</span>
             </Button>
           )}
         </div>
 
-        <div className="bg-white rounded-lg shadow w-full max-w-full overflow-hidden">
-          <div className="p-4 sm:p-6 w-full">
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="relative flex-grow">
-                <Search
-                  placeholder="Cari pengguna..."
-                  onSearch={handleSearch}
-                  initialValue={searchTerm}
-                />
-              </div>
-            </div>
+        <div className="surface-card overflow-hidden">
+          <div className="border-b border-border p-4">
+            <Search
+              placeholder="Cari pengguna"
+              onSearch={handleSearch}
+              initialValue={searchTerm}
+            />
+          </div>
 
-            <div 
-              className="overflow-x-auto w-full rounded-md border border-gray-100 pb-2 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-gray-400 transition-colors"
-              style={{ WebkitOverflowScrolling: 'touch' }}
-            >
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="w-12 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Posisi</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kantor</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                  </tr>
-                </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {currentItems.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-4 text-center text-sm text-gray-500">
-                      Tidak ada data pengguna
-                    </td>
-                  </tr>
-                ) : (
-                  currentItems.map((user: any, index: number) => (
-                    <tr key={user.id} className="hover:bg-gray-50">
-                      <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
+          {currentItems.length > 0 ? (
+            <>
+              {/* Desktop table */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-14">No</TableHead>
+                      <TableHead>Nama</TableHead>
+                      <TableHead>Username</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead>Posisi</TableHead>
+                      <TableHead>Departemen</TableHead>
+                      <TableHead className="text-right">Aksi</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {currentItems.map((user: any, index: number) => (
+                      <TableRow key={user.id}>
+                        <TableCell className="text-muted-foreground tabular-nums">
                           {from + index}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
-                            <span className="text-gray-700 font-medium">
-                              {user.name.charAt(0).toUpperCase()}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <UserAvatar name={user.name} imageSrc={user.avatar} className="h-8 w-8" />
+                            <span className="font-medium text-foreground">{user.name}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-mono text-xs text-muted-foreground">
+                          @{user.username}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={user.role === 'admin' ? 'success' : 'secondary'}>
+                            {user.displayRole || (user.role === 'admin' ? 'Admin' : 'User')}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {user.position || '-'}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {user.department || '-'}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1.5">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEditUser(user)}
+                              className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                              title="Edit"
+                              aria-label={`Edit ${user.name}`}
+                            >
+                              <Pencil className="h-4 w-4" strokeWidth={1.5} />
+                            </Button>
+                            {isAdmin && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleOpenDeleteDialog(user.id)}
+                                className="h-8 w-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                                title="Hapus"
+                                aria-label={`Hapus ${user.name}`}
+                              >
+                                <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile card list */}
+              <div className="divide-y divide-border md:hidden">
+                {currentItems.map((user: any, index: number) => (
+                  <div key={user.id} className="p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <UserAvatar name={user.name} imageSrc={user.avatar} />
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-mono text-muted-foreground tabular-nums">
+                              #{from + index}
                             </span>
+                            <Badge variant={user.role === 'admin' ? 'success' : 'secondary'}>
+                              {user.displayRole || (user.role === 'admin' ? 'Admin' : 'User')}
+                            </Badge>
                           </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                            <div className="text-sm text-gray-500">@{user.username}</div>
-                          </div>
+                          <p className="mt-1 truncate text-sm font-medium text-foreground">
+                            {user.name}
+                          </p>
+                          <p className="text-xs font-mono text-muted-foreground">
+                            @{user.username}
+                          </p>
                         </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        @{user.username}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            user.role === 'admin'
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-blue-100 text-blue-800'
-                          }`}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+                      <span>
+                        {user.position || '-'} &middot; {user.department || '-'}
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEditUser(user)}
                         >
-                          {user.displayRole}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user.position || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {user.department || '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex justify-end space-x-2">
+                          <Pencil className="h-3.5 w-3.5" strokeWidth={1.5} />
+                          <span>Edit</span>
+                        </Button>
+                        {isAdmin && (
                           <Button
                             variant="outline"
-                            size="icon"
-                            onClick={() => handleEditUser(user)}
-                            className="border-gray-200 hover:bg-blue-50 hover:text-blue-600"
-                            title="Edit"
+                            size="sm"
+                            onClick={() => handleOpenDeleteDialog(user.id)}
+                            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                           >
-                            <Pencil className="h-4 w-4" />
+                            <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
                           </Button>
-                          {isAdmin && (
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => handleOpenDeleteDialog(user.id)}
-                              className="border-gray-200 hover:bg-red-50 hover:text-red-600"
-                              title="Hapus"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-            {/* Always show pagination component if there are items */}
-            {total > 0 && (
-              <div className="px-6 py-4 border-t border-gray-200">
-                <Pagination
-                  totalItems={total}
-                  itemsPerPage={per_page}
-                  currentPage={current_page}
-                  onPageChange={handlePageChange}
-                />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            )}
-          </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                <UsersIcon className="h-5 w-5" strokeWidth={1.5} />
+              </div>
+              <p className="mt-3 text-sm font-medium text-foreground">
+                Tidak ada data pengguna
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Tambahkan pengguna baru atau ubah kata kunci pencarian.
+              </p>
+            </div>
+          )}
+
+          {total > 0 && (
+            <div className="border-t border-border px-4 py-3 sm:px-6">
+              <Pagination
+                totalItems={total}
+                itemsPerPage={per_page}
+                currentPage={current_page}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          )}
         </div>
       </div>
 
-      {/* User Form Modal */}
       <UserForm
         open={isFormOpen}
         onOpenChange={setIsFormOpen}
@@ -381,8 +387,7 @@ export default function UsersPage({
         departments={departments}
         positions={positions}
       />
-      
-      {/* Delete Confirmation Dialog */}
+
       <DeleteConfirmationDialog
         isOpen={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
@@ -392,7 +397,7 @@ export default function UsersPage({
         confirmText="Hapus"
         cancelText="Batal"
         isLoading={isDeleting}
-        itemName={currentItems.find(user => user.id === userToDelete)?.name || ''}
+        itemName={currentItems.find((user) => user.id === userToDelete)?.name || ''}
       />
     </AppLayout>
   );

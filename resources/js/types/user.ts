@@ -1,4 +1,3 @@
-// User related types
 export interface UserType {
   id: number;
   name: string;
@@ -6,16 +5,15 @@ export interface UserType {
   email: string;
   role: 'admin' | 'user';
   avatar: string | null;
-  departement_id?: number | null;
+  department_id?: number | null;
   position_id?: number | null;
-  department?: { id: number; name: string };
-  position?: { id: number; name: string };
+  department?: { id: number; name: string } | string | null;
+  position?: { id: number; name: string } | string | null;
   created_at: string;
   updated_at: string;
-  [key: string]: any; // For dynamic properties
+  [key: string]: any;
 }
 
-// Type guard to check if an object is a UserType
 export function isUserType(obj: any): obj is UserType {
   return (
     obj &&
@@ -37,7 +35,6 @@ export interface PositionType {
   name: string;
 }
 
-// Form data type with all fields as optional for partial updates
 export interface UserFormData {
   id?: string | number;
   name?: string;
@@ -46,12 +43,11 @@ export interface UserFormData {
   password?: string;
   password_confirmation?: string;
   avatar?: string | File | null;
-  departement_id?: string | number;
+  department_id?: string | number;
   position_id?: string | number;
-  [key: string]: any; // For dynamic access
+  [key: string]: any;
 }
 
-// Type guard to check if an object is a UserFormData
 export function isUserFormData(obj: any): obj is UserFormData {
   return (
     obj &&
