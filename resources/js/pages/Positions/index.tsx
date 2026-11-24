@@ -1,16 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
-import { Button } from '@/components/ui/button';
-import { Plus, Pencil, Trash2, X } from 'lucide-react';
-import { DeleteConfirmationDialog } from '@/components/DeleteConfirmationDialog';
+import { toast } from 'sonner';
+import { Briefcase, Pencil, Plus, Trash2 } from 'lucide-react';
+import AppLayout from '@/layouts/AppLayout';
 import Search from '@/components/Search';
+import { Pagination } from '@/components/Pagination';
+import { DeleteConfirmationDialog } from '@/components/DeleteConfirmationDialog';
 import PositionForm from './Form';
 import type { Position } from './Form';
-import { Pagination } from '@/components/Pagination';
-import { toast } from 'sonner';
-import AppLayout from '@/layouts/AppLayout';
+import { Button } from '@/components/ui/button';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
-// Types
 interface User {
   id: number;
   name: string;
@@ -38,16 +45,6 @@ type PageProps = {
   };
 };
 
-interface PaginatedData<T> {
-  data: T[];
-  current_page: number;
-  last_page: number;
-  per_page: number;
-  total: number;
-  from: number;
-  to: number;
-}
-
 const PositionsPage: React.FC = () => {
   const { positions, auth } = usePage<PageProps>().props;
   const [searchValue, setSearchValue] = useState(positions.filters?.search || '');
@@ -56,44 +53,42 @@ const PositionsPage: React.FC = () => {
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [positionToDelete, setPositionToDelete] = useState<Position | null>(null);
-  
+
   const currentPage = positions?.current_page || 1;
-  const lastPage = positions?.last_page || 1;
   const isAdmin = auth.user?.role === 'admin';
 
-  // Handle search
   const handleSearch = (value: string) => {
     setSearchValue(value);
-    const params: any = {};
+    const params: Record<string, string | number> = {};
     if (value.trim()) {
       params.search = value;
       params.page = 1;
     }
+    router.get(route('positions.index'), params, {
+      preserveState: true,
+      replace: true,
+      preserveScroll: true,
+    });
+  };
+
+  const handlePageChange = (page: number) => {
     router.get(
-      route('positions.index'), 
-      params,
-      { preserveState: true, replace: true, preserveScroll: true }
+      route('positions.index'),
+      { page, search: searchValue || undefined },
+      { preserveState: true }
     );
   };
 
-  // Handle page change
-  const handlePageChange = (page: number) => {
-    router.get(route('positions.index'), { page }, { preserveState: true });
-  };
-
-  // Handle create position
   const handleCreate = () => {
     setSelectedPosition(null);
     setIsFormOpen(true);
   };
 
-  // Handle edit position
   const handleEdit = (position: Position) => {
     setSelectedPosition(position);
     setIsFormOpen(true);
   };
 
-  // Handle delete position
   const handleDeleteClick = (position: Position) => {
     setPositionToDelete(position);
     setDeleteDialogOpen(true);
@@ -101,9 +96,9 @@ const PositionsPage: React.FC = () => {
 
   const handleDeleteConfirm = () => {
     if (!positionToDelete || !positionToDelete.id) return;
-    
+
     setIsDeleting(positionToDelete.id);
-    
+
     router.delete(route('positions.destroy', positionToDelete.id), {
       preserveScroll: true,
       onSuccess: () => {
@@ -119,22 +114,25 @@ const PositionsPage: React.FC = () => {
       },
     });
   };
-  
+
   const handleDeleteCancel = () => {
     setDeleteDialogOpen(false);
     setPositionToDelete(null);
   };
 
-  // Handle form submission (create/update)
   const handlePositionSubmit = (data: { name: string }) => {
     const options = {
       onSuccess: () => {
         setIsFormOpen(false);
         setSelectedPosition(null);
-        toast.success(selectedPosition ? 'Posisi berhasil diperbarui' : 'Posisi berhasil dibuat');
+        toast.success(
+          selectedPosition ? 'Posisi berhasil diperbarui' : 'Posisi berhasil dibuat'
+        );
       },
       onError: () => {
-        toast.error(`Gagal ${selectedPosition ? 'memperbarui' : 'membuat'} posisi. Silakan coba lagi.`);
+        toast.error(
+          `Gagal ${selectedPosition ? 'memperbarui' : 'membuat'} posisi. Silakan coba lagi.`
+        );
       },
       preserveScroll: true,
     };
@@ -146,117 +144,167 @@ const PositionsPage: React.FC = () => {
     }
   };
 
-
-
   return (
-    <AppLayout 
-      auth={{ user: auth.user }} 
-      header="Daftar Posisi"
-    >
+    <AppLayout auth={{ user: auth.user }} header="Daftar Posisi">
       <Head title="Daftar Posisi" />
-      
+
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold">Daftar Posisi</h1>
-            <p className="text-muted-foreground">
-              Kelola data posisi yang ada di sistem
+            <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+              Daftar Posisi
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Kelola data jabatan atau posisi yang ada di sistem
             </p>
           </div>
           {isAdmin && (
-            <Button 
-              onClick={handleCreate} 
-              className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Tambah Posisi
+            <Button onClick={handleCreate} className="self-start sm:self-auto">
+              <Plus className="h-4 w-4" strokeWidth={1.5} />
+              <span>Tambah Posisi</span>
             </Button>
           )}
         </div>
 
-        <div className="bg-white rounded-lg shadow w-full max-w-full overflow-hidden">
-          <div className="p-4 sm:p-6 w-full">
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="relative flex-grow">
-                <Search
-                  placeholder="Cari posisi..."
-                  onSearch={handleSearch}
-                  initialValue={searchValue}
-                />
-              </div>
-            </div>
-
-            <div 
-              className="overflow-x-auto w-full rounded-md border border-gray-100 pb-2 [&::-webkit-scrollbar]:h-2 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-gray-400 transition-colors"
-              style={{ WebkitOverflowScrolling: 'touch' }}
-            >
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="w-12 px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Posisi</th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {positions.data.length === 0 ? (
-                    <tr>
-                      <td colSpan={3} className="px-6 py-4 text-center text-sm text-gray-500">
-                        {searchValue ? 'Tidak ada hasil yang ditemukan' : 'Belum ada data posisi'}
-                      </td>
-                    </tr>
-                  ) : (
-                    positions.data.map((position: Position, index: number) => (
-                      <tr key={position.id} className="hover:bg-gray-50">
-                        <td className="px-2 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                          {(currentPage - 1) * positions.per_page + index + 1}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">{position.name}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <div className="flex justify-end space-x-2">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => handleEdit(position)}
-                              className="border-gray-200 hover:bg-blue-50 hover:text-blue-600"
-                              title="Edit"
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            {isAdmin && (
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={() => handleDeleteClick(position)}
-                                disabled={!!isDeleting && isDeleting === position.id}
-                                className="border-gray-200 hover:bg-red-50 hover:text-red-600"
-                                title={isDeleting === position.id ? 'Menghapus...' : 'Hapus'}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {positions.total > 0 && (
-              <div className="mt-6">
-                <Pagination
-                  totalItems={positions.total}
-                  itemsPerPage={positions.per_page}
-                  currentPage={currentPage}
-                  onPageChange={handlePageChange}
-                />
-              </div>
-            )}
+        <div className="surface-card overflow-hidden">
+          <div className="border-b border-border p-4">
+            <Search
+              placeholder="Cari posisi"
+              onSearch={handleSearch}
+              initialValue={searchValue}
+            />
           </div>
+
+          {positions.data.length > 0 ? (
+            <>
+              {/* Desktop table */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-16">No</TableHead>
+                      <TableHead>Nama Posisi</TableHead>
+                      <TableHead className="text-right">Aksi</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {positions.data.map((position, index) => {
+                      const itemNumber = (currentPage - 1) * positions.per_page + index + 1;
+                      return (
+                        <TableRow key={position.id}>
+                          <TableCell className="text-muted-foreground tabular-nums">
+                            {itemNumber}
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center gap-2.5">
+                              <Briefcase
+                                className="h-4 w-4 shrink-0 text-muted-foreground"
+                                strokeWidth={1.5}
+                              />
+                              <span>{position.name}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-1.5">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleEdit(position)}
+                                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                                title="Edit"
+                                aria-label={`Edit ${position.name}`}
+                              >
+                                <Pencil className="h-4 w-4" strokeWidth={1.5} />
+                              </Button>
+                              {isAdmin && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleDeleteClick(position)}
+                                  disabled={!!isDeleting && isDeleting === position.id}
+                                  className="h-8 w-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                                  title={isDeleting === position.id ? 'Menghapus...' : 'Hapus'}
+                                  aria-label={`Hapus ${position.name}`}
+                                >
+                                  <Trash2 className="h-4 w-4" strokeWidth={1.5} />
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Mobile card list */}
+              <div className="divide-y divide-border md:hidden">
+                {positions.data.map((position, index) => {
+                  const itemNumber = (currentPage - 1) * positions.per_page + index + 1;
+                  return (
+                    <div
+                      key={position.id}
+                      className="flex items-center justify-between gap-3 p-4"
+                    >
+                      <div className="min-w-0">
+                        <span className="text-xs font-mono text-muted-foreground tabular-nums">
+                          #{itemNumber}
+                        </span>
+                        <p className="mt-0.5 truncate text-sm font-medium text-foreground">
+                          {position.name}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-1.5">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleEdit(position)}
+                        >
+                          <Pencil className="h-3.5 w-3.5" strokeWidth={1.5} />
+                          <span>Edit</span>
+                        </Button>
+                        {isAdmin && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteClick(position)}
+                            disabled={!!isDeleting && isDeleting === position.id}
+                            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" strokeWidth={1.5} />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                <Briefcase className="h-5 w-5" strokeWidth={1.5} />
+              </div>
+              <p className="mt-3 text-sm font-medium text-foreground">
+                {searchValue ? 'Tidak ada hasil yang ditemukan' : 'Belum ada data posisi'}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Tambahkan posisi atau jabatan baru ke dalam sistem.
+              </p>
+            </div>
+          )}
+
+          {positions.total > 0 && (
+            <div className="border-t border-border px-4 py-3 sm:px-6">
+              <Pagination
+                totalItems={positions.total}
+                itemsPerPage={positions.per_page}
+                currentPage={currentPage}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -273,7 +321,6 @@ const PositionsPage: React.FC = () => {
         selectedPosition={selectedPosition || undefined}
       />
 
-      {/* Delete Confirmation Dialog */}
       <DeleteConfirmationDialog
         isOpen={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
@@ -287,6 +334,5 @@ const PositionsPage: React.FC = () => {
     </AppLayout>
   );
 };
-
 
 export default PositionsPage;
