@@ -146,7 +146,7 @@ export default function AppLayout({ auth, header, children }: AppLayoutProps) {
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
                                         variant="destructive"
-                                        onClick={handleLogout}
+                                        onSelect={handleLogout}
                                         className="cursor-pointer flex items-center gap-2"
                                     >
                                         <LogOut className="h-4 w-4" strokeWidth={1.5} />
