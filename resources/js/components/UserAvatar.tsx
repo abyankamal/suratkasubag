@@ -8,7 +8,9 @@ interface UserAvatarProps {
 
 export function UserAvatar({ name, imageSrc, className }: UserAvatarProps) {
   const initials = name
-    .split(' ')
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
     .map((n) => n[0])
     .slice(0, 2)
     .join('')
@@ -17,21 +19,21 @@ export function UserAvatar({ name, imageSrc, className }: UserAvatarProps) {
   return (
     <div
       className={cn(
-        'relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full',
+        'relative flex h-9 w-9 shrink-0 overflow-hidden rounded-lg border border-primary/15 bg-primary/10 text-primary',
         className
       )}
     >
       {imageSrc ? (
-        <img 
-          src={imageSrc} 
+        <img
+          src={imageSrc}
           alt={name}
           className="aspect-square h-full w-full object-cover"
-          width={40}
-          height={40}
+          width={36}
+          height={36}
         />
       ) : (
-        <div className="flex h-full w-full items-center justify-center rounded-full bg-blue-100 text-sm font-medium text-blue-600">
-          {initials}
+        <div className="flex h-full w-full items-center justify-center text-xs font-semibold tracking-wide">
+          {initials || 'U'}
         </div>
       )}
     </div>
