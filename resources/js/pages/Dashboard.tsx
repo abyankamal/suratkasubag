@@ -35,8 +35,9 @@ interface DashboardProps {
     user: {
       id: number;
       name: string;
+      username: string;
       email: string;
-      level: 'admin' | 'user';
+      role: 'admin' | 'user';
     } | null;
   };
 }
