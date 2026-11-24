@@ -1,12 +1,13 @@
-import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { AlertTriangle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
-  DialogTitle,
-  DialogClose,
+  DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface DeleteConfirmationDialogProps {
   isOpen: boolean;
@@ -38,48 +39,45 @@ export function DeleteConfirmationDialog({
     onOpenChange(false);
   };
 
-  const handleConfirm = () => {
-    onConfirm();
-  };
-
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] bg-white" hideCloseButton>
-        <div className="flex items-center justify-between">
-          <DialogTitle>{title}</DialogTitle>
-          <DialogClose asChild>
-            <button
-              className="text-gray-500 hover:text-gray-700 focus:outline-none"
-              disabled={isLoading}
-              aria-label="Tutup"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </DialogClose>
-        </div>
-        
-        <div className="py-4">
-          {typeof description === 'string' ? (
-            <p>{description} <span className="font-medium">{itemName}</span>?</p>
-          ) : (
-            description
-          )}
-        </div>
-        
-        <DialogFooter>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
+              <AlertTriangle className="h-5 w-5" strokeWidth={1.5} />
+            </div>
+            <DialogTitle>{title}</DialogTitle>
+          </div>
+          <DialogDescription className="pt-2 text-left leading-relaxed">
+            {typeof description === 'string' ? (
+              <>
+                {description}{' '}
+                {itemName && (
+                  <span className="font-medium text-foreground">{itemName}</span>
+                )}
+                ? Tindakan ini tidak dapat dibatalkan.
+              </>
+            ) : (
+              description
+            )}
+          </DialogDescription>
+        </DialogHeader>
+
+        <DialogFooter className="mt-2 gap-2">
           <Button
             variant="outline"
             onClick={handleCancel}
             disabled={isLoading}
             type="button"
+            autoFocus
           >
             {cancelText}
           </Button>
           <Button
             variant="destructive"
-            onClick={handleConfirm}
+            onClick={onConfirm}
             disabled={isLoading}
-            className="bg-red-600 hover:bg-red-700"
             type="button"
           >
             {isLoading ? 'Memproses...' : confirmText}

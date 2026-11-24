@@ -1,12 +1,13 @@
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PaginationProps {
   totalItems: number;
   itemsPerPage: number;
   currentPage: number;
   onPageChange: (page: number) => void;
-};
+}
 
 export function Pagination({
   totalItems,
@@ -16,71 +17,70 @@ export function Pagination({
 }: PaginationProps) {
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
   const safePage = Math.max(1, Math.min(currentPage, totalPages));
-  
+
   const getPageNumbers = () => {
     const maxPagesToShow = 5;
     let startPage = Math.max(1, safePage - Math.floor(maxPagesToShow / 2));
     const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
-    
+
     if (endPage - startPage + 1 < maxPagesToShow) {
       startPage = Math.max(1, endPage - maxPagesToShow + 1);
     }
-    
+
     return Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
   };
-  
+
   const pageNumbers = getPageNumbers();
-  
+
   const handlePageClick = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       onPageChange(page);
     }
   };
 
-  // Calculate the range of items being shown
   const startItem = totalItems > 0 ? (safePage - 1) * itemsPerPage + 1 : 0;
   const endItem = Math.min(safePage * itemsPerPage, totalItems);
 
   return (
-    <nav className="flex items-center justify-between px-4 py-3 sm:px-6" aria-label="Pagination">
-      <div className="hidden sm:block">
-        <p className="text-sm text-gray-700">
-          {totalItems > 0 ? (
-            <>
-              Menampilkan <span className="font-medium">{startItem}</span> hingga{" "}
-              <span className="font-medium">{endItem}</span> dari{" "}
-              <span className="font-medium">{totalItems}</span> data
-            </>
-          ) : (
-            'Tidak ada data yang tersedia'
-          )}
-        </p>
-      </div>
-      
-      <div className="flex flex-1 justify-between sm:justify-end">
+    <nav
+      className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+      aria-label="Navigasi halaman"
+    >
+      <p className="text-sm text-muted-foreground tabular-nums">
+        {totalItems > 0 ? (
+          <>
+            Menampilkan <span className="font-medium text-foreground">{startItem}</span>–
+            <span className="font-medium text-foreground">{endItem}</span> dari{' '}
+            <span className="font-medium text-foreground">{totalItems}</span> data
+          </>
+        ) : (
+          'Tidak ada data'
+        )}
+      </p>
+
+      <div className="flex items-center justify-between gap-2 sm:justify-end">
         <Button
           variant="outline"
           size="sm"
           onClick={() => handlePageClick(safePage - 1)}
           disabled={safePage <= 1}
-          className={cn(
-            "relative inline-flex items-center rounded-md px-3 py-2 text-sm font-medium",
-            safePage <= 1 && "cursor-not-allowed opacity-50"
-          )}
+          className="gap-1 px-2.5"
         >
-          Sebelumnya
+          <ChevronLeft className="h-4 w-4" strokeWidth={1.5} />
+          <span>Sebelumnya</span>
         </Button>
 
-        <div className="hidden md:flex mx-2 space-x-1">
+        <div className="hidden items-center gap-1 md:flex">
           {pageNumbers.map((page) => (
             <Button
               key={page}
-              variant={page === safePage ? "default" : "outline"}
+              variant={page === safePage ? 'default' : 'outline'}
               size="sm"
               onClick={() => handlePageClick(page)}
+              aria-current={page === safePage ? 'page' : undefined}
               className={cn(
-                "relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md",
-                page === safePage && "z-10"
+                'min-w-[32px] px-2.5 tabular-nums',
+                page === safePage && 'pointer-events-none'
               )}
             >
               {page}
@@ -93,12 +93,10 @@ export function Pagination({
           size="sm"
           onClick={() => handlePageClick(safePage + 1)}
           disabled={safePage >= totalPages}
-          className={cn(
-            "relative ml-3 inline-flex items-center rounded-md px-3 py-2 text-sm font-medium",
-            safePage >= totalPages && "cursor-not-allowed opacity-50"
-          )}
+          className="gap-1 px-2.5"
         >
-          Selanjutnya
+          <span>Selanjutnya</span>
+          <ChevronRight className="h-4 w-4" strokeWidth={1.5} />
         </Button>
       </div>
     </nav>

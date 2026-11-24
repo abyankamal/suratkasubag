@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, ChangeEvent } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search as SearchIcon, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface SearchProps {
   /** Placeholder text for the search input */
@@ -31,10 +32,9 @@ interface SearchProps {
 
 /**
  * Live Search component — triggers `onSearch` on every keystroke (with debounce).
- * Includes a red clear button (X) to reset the search input.
  */
 const Search: React.FC<SearchProps> = ({
-  placeholder = 'Cari...',
+  placeholder = 'Cari',
   debounceTime = 300,
   initialValue = '',
   value,
@@ -48,21 +48,18 @@ const Search: React.FC<SearchProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const isFirstRender = useRef(true);
 
-  // Sync controlled value changes
   useEffect(() => {
     if (isControlled) {
       setInputValue(value);
     }
   }, [value, isControlled]);
 
-  // Auto-focus on mount
   useEffect(() => {
     if (autoFocus && inputRef.current) {
       inputRef.current.focus();
     }
   }, [autoFocus]);
 
-  // Live search: debounce on every keystroke, skip the very first render
   useEffect(() => {
     if (!onSearch) return;
 
@@ -109,31 +106,35 @@ const Search: React.FC<SearchProps> = ({
   const hasValue = isControlled ? !!value : !!inputValue;
 
   return (
-    <div className={`w-full ${className}`}>
-      <div className="relative flex items-center w-full">
-        <SearchIcon className="absolute left-3 h-4 w-4 text-muted-foreground pointer-events-none" />
+    <search className={cn('block w-full', className)}>
+      <div className="relative flex w-full items-center">
+        <SearchIcon
+          className="pointer-events-none absolute left-3 h-4 w-4 text-muted-foreground"
+          strokeWidth={1.5}
+        />
         <Input
           ref={inputRef}
-          type="text"
+          type="search"
           placeholder={placeholder}
           value={isControlled ? value : inputValue}
           onChange={handleChange}
-          className="pl-9 pr-10 w-full"
+          className="w-full pl-9 pr-9"
           autoComplete="off"
         />
         {hasValue && (
           <Button
             type="button"
             variant="ghost"
-            size="sm"
-            className="absolute right-0 h-full px-3 text-red-500 hover:text-red-700 hover:bg-red-50"
+            size="icon"
+            className="absolute right-0.5 h-8 w-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
             onClick={handleClear}
+            aria-label="Hapus pencarian"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4" strokeWidth={1.5} />
           </Button>
         )}
       </div>
-    </div>
+    </search>
   );
 };
 
