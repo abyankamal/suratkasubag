@@ -44,7 +44,7 @@ export default function AppearanceToggleDropdown({ className = '', ...props }: H
                         return (
                             <DropdownMenuItem
                                 key={value}
-                                onClick={() => updateAppearance(value)}
+                                onSelect={() => updateAppearance(value)}
                                 className="flex items-center justify-between cursor-pointer"
                             >
                                 <span className="flex items-center gap-2">
