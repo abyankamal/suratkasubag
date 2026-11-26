@@ -1,5 +1,5 @@
 import { Link, router, Head } from '@inertiajs/react';
-import { ReactNode, useState, useEffect } from 'react';
+import { ReactNode, useState, useEffect, useRef } from 'react';
 import { ChevronDown, LogOut, Menu, User as UserIcon } from 'lucide-react';
 import { UserAvatar } from '@/components/UserAvatar';
 import ApplicationLogo from '@/components/ApplicationLogo';
@@ -40,11 +40,33 @@ interface AppLayoutProps {
 
 export default function AppLayout({ auth, header, children }: AppLayoutProps) {
     const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+    const [showUserMenu, setShowUserMenu] = useState(false);
+    const userMenuRef = useRef<HTMLDivElement>(null);
     const currentYear = new Date().getFullYear();
 
     const handleLogout = () => {
+        setShowUserMenu(false);
         router.post(route('logout'));
     };
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+                setShowUserMenu(false);
+            }
+        };
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                setShowUserMenu(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener('keydown', handleKeyDown);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
 
     useEffect(() => {
         redirectIfUnauthenticated({ auth });
@@ -104,30 +126,32 @@ export default function AppLayout({ auth, header, children }: AppLayoutProps) {
                         <div className="flex items-center gap-2">
                             <AppearanceToggleDropdown />
 
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        className="flex h-9 items-center gap-2 rounded-lg px-2 hover:bg-accent"
-                                        aria-label="Menu akun"
-                                    >
-                                        <UserAvatar
-                                            name={auth.user.name || 'User'}
-                                            imageSrc={auth.user.avatar}
-                                            className="h-7 w-7"
-                                        />
-                                        <span className="hidden text-sm font-medium text-foreground md:inline">
-                                            {auth.user.name}
-                                        </span>
-                                        <ChevronDown
-                                            className="h-4 w-4 text-muted-foreground"
-                                            strokeWidth={1.5}
-                                        />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-52">
-                                    <DropdownMenuLabel className="font-normal">
-                                        <div className="flex flex-col space-y-0.5">
+                            <div className="relative" ref={userMenuRef}>
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    onClick={() => setShowUserMenu((prev) => !prev)}
+                                    className="flex h-9 items-center gap-2 rounded-lg px-2 hover:bg-accent"
+                                    aria-label="Menu akun"
+                                    aria-expanded={showUserMenu}
+                                >
+                                    <UserAvatar
+                                        name={auth.user.name || 'User'}
+                                        imageSrc={auth.user.avatar}
+                                        className="h-7 w-7"
+                                    />
+                                    <span className="hidden text-sm font-medium text-foreground md:inline">
+                                        {auth.user.name}
+                                    </span>
+                                    <ChevronDown
+                                        className="h-4 w-4 text-muted-foreground"
+                                        strokeWidth={1.5}
+                                    />
+                                </Button>
+
+                                {showUserMenu && (
+                                    <div className="absolute right-0 mt-2 w-52 rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-md z-50">
+                                        <div className="px-2 py-1.5">
                                             <p className="text-sm font-medium text-foreground truncate">
                                                 {auth.user.name}
                                             </p>
@@ -135,25 +159,27 @@ export default function AppLayout({ auth, header, children }: AppLayoutProps) {
                                                 @{auth.user.username}
                                             </p>
                                         </div>
-                                    </DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem asChild className="cursor-pointer">
-                                        <Link href={route('profile')} className="flex items-center gap-2">
+                                        <div className="my-1 h-px bg-border" />
+                                        <Link
+                                            href={route('profile')}
+                                            onClick={() => setShowUserMenu(false)}
+                                            className="flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
+                                        >
                                             <UserIcon className="h-4 w-4" strokeWidth={1.5} />
                                             <span>Profil Saya</span>
                                         </Link>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                        variant="destructive"
-                                        onSelect={handleLogout}
-                                        className="cursor-pointer flex items-center gap-2"
-                                    >
-                                        <LogOut className="h-4 w-4" strokeWidth={1.5} />
-                                        <span>Keluar</span>
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                                        <div className="my-1 h-px bg-border" />
+                                        <button
+                                            type="button"
+                                            onClick={handleLogout}
+                                            className="flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm text-destructive hover:bg-destructive/10"
+                                        >
+                                            <LogOut className="h-4 w-4" strokeWidth={1.5} />
+                                            <span>Keluar</span>
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </header>
