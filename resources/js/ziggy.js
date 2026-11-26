@@ -1,5 +1,5 @@
 export const Ziggy = {
-    url: 'https://suratkasubag.com',
+    url: 'https://sibulan.my.id',
     port: null,
     defaults: {},
     routes: {
